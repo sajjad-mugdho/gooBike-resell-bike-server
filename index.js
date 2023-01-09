@@ -62,9 +62,9 @@ async function run() {
         });
 
 
-        //=====
+        //==================
         //Bike Apis
-        //=====
+        //=============================================
 
         //Get Bikes
 
@@ -77,7 +77,7 @@ async function run() {
 
         app.get('/bikes/:email', async (req, res) => {
             const email = req.params.email;
-            console.log("Email", email);
+            
             const query = { email: email };
             const bikes = await bikesCollection.find(query).toArray()
             res.send(bikes)
@@ -86,7 +86,14 @@ async function run() {
         //Get Bike By Category
 
         app.get('/bike/:category', async (req, res) => {
+            const category = req.params.category;
+            console.log("cate", category);
+            const query = {category: category};
 
+            const bikeCategory = await bikesCollection.find(query).toArray();
+
+            res.send(bikeCategory)
+            
         })
 
         // Add Bikes
