@@ -14,6 +14,24 @@ const port = process.env.PORT || 5000
 app.use(cors())
 app.use(express.json())
 
+function verifyJWT(req, res, next) {
+    const authHeader = req.headers.authorization
+
+    if (!authHeader) {
+        return res.status(401).send({ message: 'unauthorized access' })
+    }
+    const token = authHeader.split(' ')[1]
+
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+        if (err) {
+            return res.status(403).send({ message: 'Forbidden access' })
+        }
+        console.log(decoded)
+        req.decoded = decoded
+        next()
+    })
+}
+
 
 const uri = process.env.DB_URI;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
@@ -51,15 +69,25 @@ async function run() {
         //Get Bikes
 
         app.get('/bikes', async (req, res) => {
-            const quary ={};
+            const quary = {};
             const bikes = await bikesCollection.find(quary).toArray();
             res.send(bikes)
         });
+
+
         app.get('/bikes/:email', async (req, res) => {
-            const quary ={email: email};
-            const bikes = await bikesCollection.findOne(quary);
+            const email = req.params.email;
+            console.log("Email", email);
+            const query = { email: email };
+            const bikes = await bikesCollection.find(query).toArray()
             res.send(bikes)
         });
+
+        //Get Bike By Category
+
+        app.get('/bike/:category', async (req, res) => {
+
+        })
 
         // Add Bikes
 
