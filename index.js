@@ -74,10 +74,18 @@ async function run() {
             res.send(bikes)
         });
 
+        // app.get('/bike/:id', async (req, res) => {
+        //     const id = req.params.id;
+        //     console.log(id);
+        //     const query = { _id: ObjectId(id) };
+        //     const bike = await bikesCollection.findOne(query);
+        //     res.send(bike)
+        // });
+
 
         app.get('/bikes/:email', async (req, res) => {
             const email = req.params.email;
-            
+
             const query = { email: email };
             const bikes = await bikesCollection.find(query).toArray()
             res.send(bikes)
@@ -88,12 +96,12 @@ async function run() {
         app.get('/bike/:category', async (req, res) => {
             const category = req.params.category;
             console.log("cate", category);
-            const query = {category: category};
+            const query = { category: category };
 
             const bikeCategory = await bikesCollection.find(query).toArray();
 
             res.send(bikeCategory)
-            
+
         })
 
         // Add Bikes
