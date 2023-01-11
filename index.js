@@ -128,8 +128,12 @@ async function run() {
         // ========= Bookings API====================
         //===========================================
 
-        app.post('/bookings', (req, res) =>{
-            console.log("lal");
+        app.post('/bookings', async (req, res) =>{
+            const booking = req.body;
+            console.log(booking);
+
+            const result = await bookingsCollection.insertOne(booking);
+            res.send(result)
         })
     }
 
