@@ -40,6 +40,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     const usersCollection = client.db('gooBike').collection('users');
     const bikesCollection = client.db('gooBike').collection('bikes');
+    const bookingsCollection = client.db('gooBike').collection('bookings');
 
     try {
         // Save user email & generate JWT
@@ -60,6 +61,16 @@ async function run() {
             console.log(result)
             res.send({ result, token })
         });
+
+        // get user 
+
+        app.get('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            console.log(email);
+            const query = {email: email};
+            const result = await usersCollection.findOne(query);
+            res.send(result)
+        })
 
 
         //==================
@@ -110,6 +121,15 @@ async function run() {
             const bike = req.body;
             const result = await bikesCollection.insertOne(bike);
             res.send(result)
+        });
+
+
+        //===========================================
+        // ========= Bookings API====================
+        //===========================================
+
+        app.post('/bookings', (req, res) =>{
+            console.log("lal");
         })
     }
 
