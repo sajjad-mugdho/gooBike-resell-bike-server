@@ -122,6 +122,21 @@ async function run() {
             res.send(bike)
         });
 
+        app.put('/bike/:id',  async (req, res) => {
+
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    status: 'Booked'
+                }
+            }
+            const result = await bikesCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+
+        })
+
 
         app.get('/bikes/:email', async (req, res) => {
             const email = req.params.email;
@@ -172,6 +187,8 @@ async function run() {
             const result = await bookingsCollection.insertOne(booking);
             res.send(result)
         })
+
+        
     }
 
 
