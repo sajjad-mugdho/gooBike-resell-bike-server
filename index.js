@@ -70,6 +70,13 @@ async function run() {
             const query = {email: email};
             const result = await usersCollection.findOne(query);
             res.send(result)
+        });
+
+        app.get('/users', async (req, res ) =>{
+            const query = {};
+            const result = await usersCollection.find(query).toArray();
+            res.send(result);
+
         })
 
 
