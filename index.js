@@ -92,13 +92,13 @@ async function run() {
             res.send(bikes)
         });
 
-        // app.get('/bike/:id', async (req, res) => {
-        //     const id = req.params.id;
-        //     console.log(id);
-        //     const query = { _id: ObjectId(id) };
-        //     const bike = await bikesCollection.findOne(query);
-        //     res.send(bike)
-        // });
+        app.get('/bike/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id);
+            const query = { _id: ObjectId(id) };
+            const bike = await bikesCollection.findOne(query);
+            res.send(bike)
+        });
 
 
         app.get('/bikes/:email', async (req, res) => {
