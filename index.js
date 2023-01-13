@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const jwt = require('jsonwebtoken')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb')
+const { query } = require('express')
 
 
 require('dotenv').config()
@@ -179,6 +180,14 @@ async function run() {
         //===========================================
         // ========= Bookings API====================
         //===========================================
+
+        app.get('/bookings/:email', async (req, res ) =>{
+            const email = req.params.email;
+            console.log(email);
+            const filter = {buyerEmail: email};
+            const booking = await bookingsCollection.find(filter).toArray();
+            res.send(booking)
+        });
 
         app.post('/bookings', async (req, res) =>{
             const booking = req.body;
