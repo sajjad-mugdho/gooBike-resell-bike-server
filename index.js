@@ -2,10 +2,11 @@ const express = require('express')
 const cors = require('cors')
 const jwt = require('jsonwebtoken')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb')
-const { query } = require('express')
+
 
 
 require('dotenv').config()
+const stripe = require("stripe")(process.env.STRIPE_SECRATE)
 
 
 const app = express()
@@ -42,6 +43,7 @@ async function run() {
     const usersCollection = client.db('gooBike').collection('users');
     const bikesCollection = client.db('gooBike').collection('bikes');
     const bookingsCollection = client.db('gooBike').collection('bookings');
+    const paymentsCollection = client.db('gooBike').collection('payments');
 
     try {
         // Save user email & generate JWT
@@ -68,12 +70,12 @@ async function run() {
         app.get('/user/:email', async (req, res) => {
             const email = req.params.email;
             console.log(email);
-            const query = {email: email};
+            const query = { email: email };
             const result = await usersCollection.findOne(query);
             res.send(result)
         });
 
-        app.get('/users', async (req, res ) =>{
+        app.get('/users', async (req, res) => {
             const query = {};
             const result = await usersCollection.find(query).toArray();
             res.send(result);
@@ -84,10 +86,10 @@ async function run() {
             const email = req.params.email;
             const query = { email };
             const user = await usersCollection.findOne(query);
-            res.send({user })
+            res.send({ user })
         });
 
-        app.put('/users/admin/:id',  async (req, res) => {
+        app.put('/users/admin/:id', async (req, res) => {
 
             const id = req.params.id;
             const filter = { _id: ObjectId(id) }
@@ -101,7 +103,43 @@ async function run() {
             res.send(result);
 
         })
+        //========================================================
+        //==========Payment Api===================================
 
+        app.post('/create-payment-intent', async (req, res) => {
+            const booking = req.body;
+            const price = booking.price;
+            const amount = price * 100;
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: "usd",
+                "payment_method_types": [
+                    "card"
+                ]
+                
+              });
+
+              res.send({
+                clientSecret: paymentIntent.client_secret,
+              });
+
+        })
+
+        app.post('/payments', async (req, res) =>{
+            const payment = req.body;
+            const result = await paymentsCollection.insertOne(payment);
+            const id = payment.bookingId
+            const filter = {_id: ObjectId(id)}
+            const updatedDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId,
+                    status: "Paid"
+                }
+            }
+            const updatedResult = await bookingsCollection.updateOne(filter, updatedDoc)
+            res.send(result);
+        })
 
         //==================
         //Bike Apis
@@ -123,7 +161,7 @@ async function run() {
             res.send(bike)
         });
 
-        app.put('/bike/:id',  async (req, res) => {
+        app.put('/bike/:id', async (req, res) => {
 
             const id = req.params.id;
             const filter = { _id: ObjectId(id) }
@@ -170,7 +208,7 @@ async function run() {
 
         app.delete("/bike/:id", async (req, res) => {
             const id = req.params.id;
-            const query = {_id: ObjectId(id)};
+            const query = { _id: ObjectId(id) };
 
             const result = await bikesCollection.deleteOne(query);
             res.send(result)
@@ -181,23 +219,29 @@ async function run() {
         // ========= Bookings API====================
         //===========================================
 
-        app.get('/bookings/:email', async (req, res ) =>{
+        app.get('/bookings/:email', async (req, res) => {
             const email = req.params.email;
             console.log(email);
-            const filter = {buyerEmail: email};
+            const filter = { buyerEmail: email };
             const booking = await bookingsCollection.find(filter).toArray();
             res.send(booking)
         });
 
-        app.post('/bookings', async (req, res) =>{
+        app.get("/booking/:id", async (req, res) => {
+            const id = req.params.id;
+            console.log(id);
+            const filter = { _id: ObjectId(id) };
+            const result = await bookingsCollection.findOne(filter);
+            res.send(result)
+        })
+
+        app.post('/bookings', async (req, res) => {
             const booking = req.body;
             console.log(booking);
 
             const result = await bookingsCollection.insertOne(booking);
             res.send(result)
-        })
-
-        
+        });
     }
 
 
